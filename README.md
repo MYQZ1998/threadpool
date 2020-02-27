@@ -8,13 +8,13 @@
 0 < max_thread_num  
 0 <= init_wakeup_ration <= 1  
   
-**int get_max_thread_num()**
+**int get_max_thread_num()**  
 获得当前设定的最大线程数量。  
   
 **int get_task_num()**  
 获得现在还未被执行的任务数量。  
   
-**int get_idle_thread_num()** 
+**int get_idle_thread_num()**  
 获得现在空闲（阻塞状态）的线程数量。  
   
 **int get_current_thread_num()**  
@@ -29,7 +29,7 @@
 提交任务，第一个参数为函数，其余参数为函数执行所需参数。  
 成功返回true，失败返回false。  
 
-**void stop_threadpool()**
+**void stop_threadpool()**  
 线程池停止工作（剩余的任务不在会被执行，正在被执行的任务继续执行）。  
 
 **void finish()**  
@@ -38,6 +38,6 @@
 **void print_err()**  
 打印最近一次的失败信息。  
 目前并没有什么用处。  
-***  
-## 线程停留时间
+***   
+## 线程停留时间  
 被创建的线程最多阻塞60秒，60秒内没有需要执行的任务的话，该线程会被销毁。  
