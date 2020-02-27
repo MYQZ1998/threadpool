@@ -25,26 +25,7 @@ threadpool::threadpool(int max_thread_num, float init_wakeup_ration):max_thread_
 
                         if(ptask != nullptr)
                         {
-                            try
-                            {
-                                ptask->excute_task();
-                            }catch(std::runtime_error& e)
-                            {
-                                err_num = 2;
-
-                                this->threadpool_mutex.lock();
-
-                                this->current_thread_num--;
-                                if(this->if_stop && this->current_thread_num == 0)
-                                {
-                                    this->if_finish = true;
-                                }
-
-                                this->threadpool_mutex.unlock();
-
-                                throw e;
-                                return;
-                            }
+                            ptask->excute_task();
                         }
 
                         std::cv_status ret;
@@ -109,26 +90,7 @@ threadpool::threadpool(int max_thread_num, float init_wakeup_ration):max_thread_
 
                                 if(ptask != nullptr)
                                 {
-                                    try
-                                    {
-                                        ptask->excute_task();
-                                    }catch(std::runtime_error& e)
-                                    {
-                                        err_num = 2;
-
-                                        this->threadpool_mutex.lock();
-
-                                        this->current_thread_num--;
-                                        if(this->if_stop && this->current_thread_num == 0)
-                                        {
-                                            this->if_finish = true;
-                                        }
-
-                                        this->threadpool_mutex.unlock();
-
-                                        throw e;
-                                        return;
-                                    }
+                                    ptask->excute_task();
                                 }
 
                                 std::cv_status ret;
@@ -223,7 +185,5 @@ void threadpool::print_err()
         case 1:
             std::cout << "threadpool is stopped" << std::endl;
             break;
-        case 2:
-            std::cout << "task function threw error" << std::endl;
     }
 }
