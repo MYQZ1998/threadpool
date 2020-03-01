@@ -1,6 +1,10 @@
 # threadpool  
 基于C++11标准实现的线程池，可以动态的改变最大线程数量。  
 ***  
+## 2020/3/1 更新  
+优化了底层逻辑，提高了效率  
+增加了修改控制线程睡眠时间的接口  
+***  
 ## 类接口函数  
 **threadpool(int max_thread_num, float init_wakeup_ration)**  
 构造函数，第一个参数是最大线程数量，第二个参数是一个比例，决定类初始化时创建的线程数量。 
@@ -34,7 +38,13 @@
 
 **void finish()**  
 线程池停止工作并阻塞等待正在被执行的任务执行完毕。  
-
+  
+**int get_control_thread_sleeptime()**  
+获取控制线程的睡眠时间（这一定程度上会影响分派任务的效率）  
+  
+**void set_control_thread_sleeptime()**
+设置控制线程的睡眠时间，单位为毫秒（默认值为50）
+  
 **void print_err()**  
 打印最近一次的失败信息。  
 目前并没有什么用处。  
