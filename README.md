@@ -42,7 +42,7 @@
 **int get_control_thread_sleeptime()**  
 获取控制线程的睡眠时间（这一定程度上会影响分派任务的效率）  
   
-**void set_control_thread_sleeptime()**
+**void set_control_thread_sleeptime()**  
 设置控制线程的睡眠时间，单位为毫秒（默认值为50）
   
 **void print_err()**  
