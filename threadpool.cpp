@@ -1,7 +1,8 @@
 #include "threadpool.h"
+using namespace tp;
 
 threadpool::threadpool(int max_thread_num, float init_wakeup_ration):max_thread_num(max_thread_num), init_wakeup_ration(init_wakeup_ration), idle_thread_num(0), current_thread_num(0)
-    , task_num(0), if_stop(false), if_finish(false), err_num(0){    
+    , task_num(0), if_stop(false), err_num(0), milliseconds(50){    
     this->main_thread = std::thread([this]()
     {
         int wakeup_thread_num = this->max_thread_num * this->init_wakeup_ration;
@@ -23,13 +24,13 @@ threadpool::threadpool(int max_thread_num, float init_wakeup_ration):max_thread_
                         }
                         this->threadpool_mutex.unlock();
 
-                        if(ptask != nullptr)
+                        if(ptask != nullptr && !this->if_stop)
                         {
                             ptask->excute_task();
                         }
 
                         std::cv_status ret;
-                        if(!this->if_stop)
+                        if(!this->if_stop && this->task_num == 0)
                         {
                             std::unique_lock<std::mutex> ul(this->threadpool_mutex);
                             this->idle_thread_num++;
@@ -39,13 +40,7 @@ threadpool::threadpool(int max_thread_num, float init_wakeup_ration):max_thread_
                         if(ret == std::cv_status::timeout || this->if_stop)
                         {
                             this->threadpool_mutex.lock();
-
                             this->current_thread_num--;
-                            if(this->if_stop && this->current_thread_num == 0)
-                            {
-                                this->if_finish = true;
-                            }
-
                             this->threadpool_mutex.unlock();
                             return;
                         }
@@ -57,7 +52,7 @@ threadpool::threadpool(int max_thread_num, float init_wakeup_ration):max_thread_
         while(true)
         {
             std::unique_lock<std::mutex> ul(this->threadpool_mutex);
-            this->threadpool_variable.wait_for(ul, std::chrono::milliseconds(50));
+            this->threadpool_variable.wait_for(ul, std::chrono::milliseconds(this->milliseconds));
 
             if(this->if_stop)
             {
@@ -105,13 +100,7 @@ threadpool::threadpool(int max_thread_num, float init_wakeup_ration):max_thread_
                                 if(ret == std::cv_status::timeout || this->if_stop)
                                 {
                                     this->threadpool_mutex.lock();
-
                                     this->current_thread_num--;
-                                    if(this->if_stop && this->current_thread_num == 0)
-                                    {
-                                        this->if_finish = true;
-                                    }
-
                                     this->threadpool_mutex.unlock();
                                     return;
                                 }
@@ -126,8 +115,8 @@ threadpool::threadpool(int max_thread_num, float init_wakeup_ration):max_thread_
 
 threadpool::~threadpool()
 {
-    if(!this->if_finish)
-        this->finish();
+    this->finish();
+    this->main_thread.join();
 }
 
 int threadpool::get_max_thread_num()
@@ -165,14 +154,21 @@ void threadpool::finish()
 {
     this->if_stop = true;
 
-    while(!this->if_finish && this->current_thread_num != 0)
+    while(this->current_thread_num != 0)
     {   
         std::this_thread::sleep_for(std::chrono::seconds(1));
         this->threadpool_variable.notify_all();
     }
+}
 
-    this->main_thread.join();
-    this->if_finish = true;
+int threadpool::get_control_thread_sleeptime()
+{
+    return this->milliseconds;
+}
+
+void threadpool::set_control_thread_sleeptime(int new_sleeptime)
+{
+    this->milliseconds = new_sleeptime;
 }
 
 void threadpool::print_err()

@@ -10,6 +10,9 @@
 #include <iostream>
 #include <exception>
 
+namespace tp
+{
+
 class task
 {
 private:
@@ -40,6 +43,7 @@ private:
 
     // main thread(control thread)
     std::thread main_thread;
+    std::atomic<int> milliseconds;
 
     // task
     std::deque< std::shared_ptr<task> > task_list;
@@ -51,7 +55,6 @@ private:
 
     // control flag
     std::atomic<bool> if_stop;
-    std::atomic<bool> if_finish;
 
     // err num
     std::atomic<int> err_num;
@@ -59,6 +62,7 @@ private:
 public:
     threadpool(int max_thread_num, float init_wakeup_ration);
     ~threadpool();
+    threadpool(threadpool&) = delete;
     int get_max_thread_num();
     int get_task_num();
     int get_idle_thread_num();
@@ -88,8 +92,11 @@ public:
     }
     void stop_threadpool();
     void finish();
-
+    int get_control_thread_sleeptime();
+    void set_control_thread_sleeptime(int new_sleeptime);
     void print_err();
 };
+
+}
 
 #endif
